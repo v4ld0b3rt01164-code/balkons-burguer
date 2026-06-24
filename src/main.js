@@ -120,22 +120,77 @@ document.addEventListener('DOMContentLoaded', () => {
     a.addEventListener('click', () => toggleMenu(false))
   })
 
-  /* ===== CARDAPIO TABS ===== */
-  const tabs = document.querySelectorAll('.cardapio-tab')
-  const categories = document.querySelectorAll('.cardapio-category')
+  /* ===== CARDAPIO ===== */
+  ;(async () => {
+    const res = await fetch('/cardapio.json')
+    const data = await res.json()
 
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'))
-      tab.classList.add('active')
-      const target = tab.dataset.tab
-      categories.forEach(cat => {
-        cat.style.display = cat.dataset.category === target ? 'block' : 'none'
+    const tabGroup = {
+      'Hambúrguers': (i) => i.categoria === 'Hambúrguers' || i.categoria === 'Promoção do Dia',
+      'Combos':       (i) => i.categoria === 'Combos',
+      'Porções':      (i) => i.categoria === 'Porcões' || i.categoria === 'Batatas',
+      'Sobremesas':   (i) => i.categoria === 'Sobremesas',
+      'Bebidas':      (i) => i.categoria === 'Bebidas',
+      'Adicionais':   (i) => i.categoria === 'Molhos Especiais' || i.categoria === 'Adicionais',
+    }
+
+    const tabsEl = document.getElementById('cardapio-tabs')
+    const contentEl = document.getElementById('cardapio-content')
+
+    const tabNames = Object.keys(tabGroup)
+    let activeTab = tabNames[0]
+
+    const render = () => {
+      tabsEl.innerHTML = ''
+      contentEl.innerHTML = ''
+
+      tabNames.forEach((name, idx) => {
+        const btn = document.createElement('button')
+        btn.className = 'cardapio-tab'
+        if (name === activeTab) btn.classList.add('active')
+        btn.textContent = name.toUpperCase()
+        btn.addEventListener('click', () => { activeTab = name; render() })
+        tabsEl.appendChild(btn)
       })
-    })
-  })
 
-  if (tabs.length > 0) tabs[0].click()
+      const items = data.filter(tabGroup[activeTab])
+      const grid = document.createElement('div')
+      grid.className = 'cardapio-grid'
+
+      items.forEach((item, idx) => {
+        const div = document.createElement('div')
+        div.className = 'cardapio-item' + (idx === 0 ? ' reveal' : ' reveal reveal-delay-' + Math.min(idx, 4))
+
+        const header = document.createElement('div')
+        header.className = 'cardapio-item-header'
+
+        const name = document.createElement('span')
+        name.className = 'cardapio-item-name'
+        name.textContent = item.item
+
+        const price = document.createElement('span')
+        price.className = 'cardapio-item-price'
+        price.textContent = 'R$ ' + item.preco.toFixed(2).replace('.', ',')
+
+        header.appendChild(name)
+        header.appendChild(price)
+        div.appendChild(header)
+
+        if (item.descricao) {
+          const desc = document.createElement('p')
+          desc.className = 'cardapio-item-desc'
+          desc.textContent = item.descricao
+          div.appendChild(desc)
+        }
+
+        grid.appendChild(div)
+      })
+
+      contentEl.appendChild(grid)
+    }
+
+    render()
+  })()
 
   /* ===== REVEAL ON SCROLL ===== */
   const revealEls = document.querySelectorAll('.reveal')
