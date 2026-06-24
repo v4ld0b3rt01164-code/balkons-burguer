@@ -197,13 +197,21 @@ a {
   align-items: center;
 }
 
-#hero-video {
+.hero-video {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   pointer-events: none;
+}
+
+.visible-desktop { display: block; }
+.visible-mobile { display: none; }
+
+@media (max-width: 767px) {
+  .visible-desktop { display: none; }
+  .visible-mobile { display: block; }
 }
 
 #hero-loading {
@@ -263,7 +271,7 @@ a {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding-top: 2rem;
+  padding-top: 6rem;
   pointer-events: none;
 }
 

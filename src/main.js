@@ -5,10 +5,12 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ===== HERO ===== */
   const heroTrack = document.getElementById('hero-track')
   const heroSection = document.getElementById('hero-section')
-  const heroVideo = document.getElementById('hero-video')
+  const vids = {
+    pc: document.getElementById('hero-video-pc'),
+    mobile: document.getElementById('hero-video-mobile'),
+  }
 
-  if (heroTrack && heroSection && heroVideo) {
-    /* Height = 3x viewport → 10s video scrub distance */
+  if (heroTrack && heroSection && vids.pc && vids.mobile) {
     const trackHeight = window.innerHeight * 3
     heroTrack.style.height = trackHeight + 'px'
 
@@ -16,45 +18,44 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadPct = document.getElementById('load-pct')
     const loading = document.getElementById('hero-loading')
 
-    /* Choose source based on screen width */
-    let loaded = false
-    const setVideoSrc = () => {
-      const isMobile = window.innerWidth < 768
-      heroVideo.src = isMobile ? heroVideo.dataset.srcMobile : heroVideo.dataset.srcPc
-      loaded = false
-      if (loading) { loading.style.opacity = '1'; loading.style.display = '' }
-      heroVideo.load()
-    }
-    setVideoSrc()
-    window.addEventListener('resize', () => {
-      const isMobile = window.innerWidth < 768
-      const current = heroVideo.src
-      const target = isMobile ? heroVideo.dataset.srcMobile : heroVideo.dataset.srcPc
-      if (!current.includes(target)) setVideoSrc()
-    })
+    /* Init both videos */
+    vids.pc.src = vids.pc.dataset.src
+    vids.mobile.src = vids.mobile.dataset.src
 
-    /* Hide loading when ready */
-    const hideLoad = () => {
-      if (loaded) return
-      loaded = true
-      loading.style.opacity = '0'
-      setTimeout(() => { loading.style.display = 'none' }, 500)
-    }
-    heroVideo.addEventListener('canplay', hideLoad)
-    heroVideo.addEventListener('loadeddata', hideLoad)
+    /* Get currently active video (visible one) */
+    const activeVideo = () => getComputedStyle(vids.pc).display !== 'none' ? vids.pc : vids.mobile
 
-    /* Buffering progress */
+    /* Hide loading when either video is ready */
+    let loaded = { pc: false, mobile: false }
+    const hideLoad = (vid) => {
+      const key = vid === vids.pc ? 'pc' : 'mobile'
+      if (loaded[key]) return
+      loaded[key] = true
+      if (loaded.pc && loaded.mobile) {
+        loading.style.opacity = '0'
+        setTimeout(() => { loading.style.display = 'none' }, 500)
+      }
+    }
+    vids.pc.addEventListener('canplay', () => hideLoad(vids.pc))
+    vids.pc.addEventListener('loadeddata', () => hideLoad(vids.pc))
+    vids.mobile.addEventListener('canplay', () => hideLoad(vids.mobile))
+    vids.mobile.addEventListener('loadeddata', () => hideLoad(vids.mobile))
+
+    /* Buffering progress (on whichever loads first) */
     setInterval(() => {
-      if (heroVideo.readyState >= 2) { hideLoad(); return }
-      if (heroVideo.buffered.length > 0) {
-        const pct = Math.round((heroVideo.buffered.end(0) / heroVideo.duration) * 100)
+      const v = activeVideo()
+      if (v.readyState >= 2) { hideLoad(v); return }
+      if (v.buffered.length > 0) {
+        const pct = Math.round((v.buffered.end(0) / v.duration) * 100)
         loadBar.style.width = pct + '%'
         if (loadPct) loadPct.textContent = String(pct)
       }
     }, 200)
 
-    /* Seek first frame */
-    heroVideo.addEventListener('loadedmetadata', () => { heroVideo.currentTime = 0 })
+    /* Seek first frame on both */
+    const seekFirst = (v) => { v.addEventListener('loadedmetadata', () => { v.currentTime = 0 }, { once: true }) }
+    seekFirst(vids.pc)
+    seekFirst(vids.mobile)
 
     /* Scroll scrub */
     const tick = () => {
@@ -62,8 +63,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const max = heroTrack.offsetHeight - window.innerHeight
       const p = max <= 0 ? 0 : Math.max(0, Math.min(1, -rect.top / max))
 
-      if (heroVideo.duration && heroVideo.readyState >= 2) {
-        heroVideo.currentTime = p * heroVideo.duration
+      const v = activeVideo()
+      if (v.duration && v.readyState >= 2) {
+        v.currentTime = p * v.duration
       }
 
       requestAnimationFrame(tick)
