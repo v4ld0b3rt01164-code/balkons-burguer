@@ -1,5 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800;900&display=swap');
 
+@font-face {
+  font-family: 'BrandFont';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('/fonts/inter-black.woff2') format('woff2');
+}
+
 :root {
   --bg: #0D0D0D;
   --bg-alt: #1A1A1A;
@@ -11,7 +19,7 @@
   --text: #FAF9F6;
   --text-muted: #8A8A8A;
   --green: #2D6A4F;
-  --font-brand: 'Arial Black', 'Switzerland Black', 'Impact', 'Haettenschweiler', sans-serif;
+  --font-brand: 'BrandFont', 'Inter', 'Arial Black', 'Switzerland Black', 'Impact', sans-serif;
   --font-heading: 'Bebas Neue', sans-serif;
   --font-body: 'Inter', sans-serif;
 }
@@ -276,7 +284,7 @@ a {
 }
 
 .hero-logo {
-  width: clamp(200px, 60vw, 380px);
+  width: clamp(220px, 66vw, 420px);
   height: auto;
   animation: heroLogoEntrance 1.2s ease-out forwards;
 }
@@ -289,7 +297,37 @@ a {
     padding-left: clamp(2rem, 8vw, 6rem);
   }
   .hero-logo {
-    width: clamp(240px, 45vw, 500px);
+    width: clamp(264px, 50vw, 550px);
+  }
+}
+
+.scroll-arrow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin-top: clamp(120px, 20vw, 200px);
+  color: #E85D04;
+  opacity: 1;
+  z-index: 30;
+  animation: bounceArrow 1.6s ease-in-out infinite;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.scroll-arrow.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes bounceArrow {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(10px); }
+}
+
+@media (min-width: 768px) {
+  .scroll-arrow {
+    display: none;
   }
 }
 
@@ -697,6 +735,7 @@ a {
   line-height: 1.8;
   font-size: 0.95rem;
   margin-bottom: 1rem;
+  text-align: justify;
 }
 
 .historia-text strong {
@@ -714,10 +753,10 @@ a {
   position: relative;
 }
 
-.historia-image svg {
-  width: 60%;
-  height: 60%;
-  opacity: 0.3;
+.historia-image img {
+  width: 85%;
+  height: auto;
+  object-fit: contain;
 }
 
 /* ===== FOOTER ===== */

@@ -73,6 +73,16 @@ document.addEventListener('DOMContentLoaded', () => {
     requestAnimationFrame(tick)
   }
 
+  /* ===== SCROLL ARROW ===== */
+  const scrollArrow = document.getElementById('scroll-arrow')
+  if (scrollArrow) {
+    const hideArrow = () => {
+      requestAnimationFrame(() => scrollArrow.classList.add('hidden'))
+      window.removeEventListener('scroll', hideArrow)
+    }
+    window.addEventListener('scroll', hideArrow, { passive: true, once: true })
+  }
+
   /* ===== NAV SCROLL ===== */
   const nav = document.querySelector('.nav')
 
@@ -159,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       items.forEach((item, idx) => {
         const div = document.createElement('div')
-        div.className = 'cardapio-item' + (idx === 0 ? ' reveal' : ' reveal reveal-delay-' + Math.min(idx, 4))
+        div.className = 'cardapio-item reveal visible' + (idx > 0 ? ' reveal-delay-' + Math.min(idx, 4) : '')
 
         const header = document.createElement('div')
         header.className = 'cardapio-item-header'

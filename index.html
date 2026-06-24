@@ -6,16 +6,13 @@
   <meta name="description" content="Balkon's Burguer - A melhor hamburgueria de Miguelópolis. Hambúrguer artesanal, smash burger e delivery.">
   <meta name="theme-color" content="#0D0D0D">
   <title>Balkon's Burguer - O Sabor do Encontro</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍔</text></svg>">
+  <link rel="icon" type="image/png" href="/favicon.png">
 </head>
 <body>
 
   <!-- ===== NAV ===== -->
   <nav class="nav" role="navigation" aria-label="Navegação principal">
-    <div class="nav-logo">
-      <img src="/logo.png" alt="Balkon's Burguer">
-      BALKON<span>'S</span>
-    </div>
+    <div class="nav-logo" onclick="location.reload()" style="cursor:pointer">BALKON'S BURGUER</div>
     <ul class="nav-links">
       <li><a href="#inicio">Início</a></li>
       <li><a href="#cardapio">Cardápio</a></li>
@@ -56,6 +53,9 @@
 
       <div class="hero-overlay">
         <img src="/logo.png" alt="Balkon's Burguer" class="hero-logo">
+        <div class="scroll-arrow" id="scroll-arrow" aria-hidden="true">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
       </div>
     </section>
   </div>
@@ -68,21 +68,22 @@
       <div class="featured-grid">
         <div class="featured-image-wrap reveal reveal-delay-2">
           <span class="featured-badge">⭐ MAIS PEDIDO</span>
-          <img src="/burger-destaque.png" alt="BALKON SMASH" class="featured-photo">
+          <img src="/destaque.webp" alt="Smash burguer salada bacon" class="featured-photo">
         </div>
         <div class="featured-info reveal reveal-delay-3">
-          <h3>BALKON SMASH</h3>
-          <div class="featured-price">R$ 32,90</div>
+          <h3>Smash burguer <span class="highlight">salada bacon</span></h3>
+          <div class="featured-price">R$ 24,00</div>
           <p class="featured-desc">
-            Hambúrguer artesanal smash de 150g com queijo cheddar cremoso, cebola caramelizada,
-            bacon crocante e molho especial da casa. Tudo servido no nosso pão brioche artesanal.
+            Pão, hambúrguer de 90 gramas, 2 fatias de cheddar, bacon, molho especial,
+            alface, tomate, picles e cebola roxa.
           </p>
           <div class="featured-tags">
-            <span class="featured-tag">150g</span>
+            <span class="featured-tag">90g</span>
             <span class="featured-tag">Cheddar</span>
-            <span class="featured-tag">Cebola Caramelizada</span>
             <span class="featured-tag">Bacon</span>
-            <span class="featured-tag">Pão Brioche</span>
+            <span class="featured-tag">Alface</span>
+            <span class="featured-tag">Tomate</span>
+            <span class="featured-tag">Picles</span>
           </div>
           <a href="https://balkonsburguer.menudino.com/" target="_blank" rel="noopener" class="cta-primary" style="display:inline-flex">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/></svg>
@@ -106,6 +107,36 @@
       <p style="color:var(--text-muted); font-size:0.85rem; margin-top:2rem; text-align:center" class="reveal">
         * Preços e disponibilidade podem variar. Consulte o cardápio atual no nosso site.
       </p>
+    </div>
+  </section>
+
+  <!-- ===== HISTORIA ===== -->
+  <section class="section historia" id="historia" data-section="historia">
+    <div class="section-inner">
+      <span class="section-label reveal">🔥 NOSSA HISTÓRIA</span>
+      <h2 class="section-title reveal reveal-delay-1">O SABOR DO <span class="highlight">ENCONTRO</span></h2>
+      <div class="historia-content">
+        <div class="historia-text reveal reveal-delay-2">
+          <p>
+            O <strong>Balkon's Burguer</strong> nasceu em <strong>Miguelópolis</strong>, interior de São Paulo,
+            da paixão por hambúrgueres artesanais bem feitos. Acreditamos que um bom hambúrguer vai além do
+            sabor — é sobre o encontro, a conversa, o momento.
+          </p>
+          <p>
+            Cada receita é pensada nos mínimos detalhes: da seleção da carne ao pão artesanal, passando pelos
+            molhos exclusivos e ingredientes frescos. Nosso compromisso é servir <strong>qualidade</strong>
+            com um preço justo para a comunidade de Miguelópolis e região.
+          </p>
+          <p>
+            Do balcão para sua mesa, o <strong>Balkon's</strong> é feito por quem entende que comida boa
+            é comida compartilhada. Seja no delivery ou presencial, queremos que cada mordida seja
+            uma experiência inesquecível.
+          </p>
+        </div>
+        <div class="historia-image reveal reveal-delay-3">
+          <img src="/logo.png" alt="Balkon's Burguer" class="historia-logo">
+        </div>
+      </div>
     </div>
   </section>
 
@@ -145,46 +176,9 @@
           </div>
         </div>
         <div class="loc-map reveal reveal-delay-3">
-          <a href="https://maps.app.goo.gl/ZQ177iJi65TZt9TR7" target="_blank" rel="noopener">
-            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3737.575692121236!2d-48.0058572!3d-20.4759118!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94bb0702615e48bb%3A0x71454c83fa8fd09f!2sAv.%20Leopoldo%20Carlos%20de%20Oliveira%2C%20207%20-%20Centro%2C%20Miguel%C3%B3polis%20-%20SP%2C%2014530-000!5e0!3m2!1spt-BR!2sbr!4v1" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Mapa - Localização Balkon's Burguer"></iframe>
+          <a href="https://www.google.com/maps/place/?q=place_id:0x94bafd9d56a03797:0xae3dc0f076278890" target="_blank" rel="noopener">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d3737.476!2d-48.0225959!3d-20.1814914!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94bafd9d56a03797%3A0xae3dc0f076278890!2sBalkon&#39;s%20Burguer!5e0!3m2!1spt-BR!2sbr!4v1" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Mapa - Balkon's Burguer"></iframe>
           </a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== HISTORIA ===== -->
-  <section class="section historia" id="historia" data-section="historia">
-    <div class="section-inner">
-      <span class="section-label reveal">🔥 NOSSA HISTÓRIA</span>
-      <h2 class="section-title reveal reveal-delay-1">O SABOR DO <span class="highlight">ENCONTRO</span></h2>
-      <div class="historia-content">
-        <div class="historia-text reveal reveal-delay-2">
-          <p>
-            O <strong>Balkon's Burguer</strong> nasceu em <strong>Miguelópolis</strong>, interior de São Paulo,
-            da paixão por hambúrgueres artesanais bem feitos. Acreditamos que um bom hambúrguer vai além do
-            sabor — é sobre o encontro, a conversa, o momento.
-          </p>
-          <p>
-            Cada receita é pensada nos mínimos detalhes: da seleção da carne ao pão artesanal, passando pelos
-            molhos exclusivos e ingredientes frescos. Nosso compromisso é servir <strong>qualidade</strong>
-            com um preço justo para a comunidade de Miguelópolis e região.
-          </p>
-          <p>
-            Do balcão para sua mesa, o <strong>Balkon's</strong> é feito por quem entende que comida boa
-            é comida compartilhada. Seja no delivery ou presencial, queremos que cada mordida seja
-            uma experiência inesquecível.
-          </p>
-        </div>
-        <div class="historia-image reveal reveal-delay-3">
-          <svg viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <ellipse cx="200" cy="230" rx="120" ry="25" fill="#D4A042" opacity="0.3"/>
-            <ellipse cx="200" cy="185" rx="125" ry="28" fill="#4A1A0A" opacity="0.3"/>
-            <ellipse cx="200" cy="155" rx="135" ry="30" fill="#2D6A4F" opacity="0.3"/>
-            <ellipse cx="200" cy="115" rx="125" ry="45" fill="#D4A042" opacity="0.3"/>
-            <text x="200" y="170" text-anchor="middle" fill="#FAF9F6" font-family="Arial Black, sans-serif" font-size="24" letter-spacing="2">DESDE 2024</text>
-            <text x="200" y="200" text-anchor="middle" fill="#E85D04" font-family="Bebas Neue, sans-serif" font-size="14" letter-spacing="4">MIGUELÓPOLIS - SP</text>
-          </svg>
         </div>
       </div>
     </div>
@@ -194,7 +188,7 @@
   <footer class="footer">
     <div class="footer-grid">
       <div>
-        <div class="footer-brand">BALKON<span>'S</span></div>
+        <div class="footer-brand">BALKON'S BURGUER</div>
         <p class="footer-tagline">O sabor do encontro em cada mordida.</p>
         <div class="footer-social">
           <a href="https://www.instagram.com/balkons_burguer/" target="_blank" rel="noopener" aria-label="Instagram">
