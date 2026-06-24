@@ -77,4 +77,5 @@ vite.config.js      # minimal: outDir, assetsInlineLimit: 0
 - Nav is fixed dark from page load (no transparency transition)
 - Nav-logo click reloads page (`location.reload()`)
 - Mobile hero has a bouncing scroll arrow that hides on first scroll
+- Refresh always scrolls to top (`history.scrollRestoration = 'manual'` in `src/main.js:3`)
 - Sections order: hero → featured → cardápio → história → localização → footer
