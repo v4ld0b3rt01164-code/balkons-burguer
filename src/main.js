@@ -252,6 +252,21 @@ document.addEventListener('DOMContentLoaded', () => {
     render()
   })()
 
+  /* ===== CARDAPIO TOGGLE ===== */
+  const cardapioToggle = document.getElementById('cardapio-toggle')
+  const cardapioBody = document.getElementById('cardapio-body')
+  if (cardapioToggle && cardapioBody) {
+    cardapioToggle.addEventListener('click', () => {
+      const isOpen = cardapioBody.classList.toggle('open')
+      cardapioToggle.textContent = isOpen ? 'Fechar cardápio' : 'Ver nosso cardápio'
+      if (isOpen) {
+        setTimeout(() => {
+          cardapioBody.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }, 100)
+      }
+    })
+  }
+
   /* ===== REVEAL ON SCROLL ===== */
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
