@@ -44,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (isMobile()) {
       /* ── MOBILE: Canvas image sequence + GSAP ScrollTrigger ── */
+      document.body.style.overflow = 'hidden'
       const ctx = mobileCanvas.getContext('2d')
       const frames = []
       let loadedCount = 0
@@ -71,6 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (loadedCount === MOBILE_FRAME_COUNT) {
             drawFrame(0)
             hideLoad()
+            document.body.style.overflow = ''
             initMobileScrub()
           }
         }
