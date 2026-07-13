@@ -40,9 +40,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function lockScroll() {
     document.documentElement.style.overflow = 'hidden'
+    document.body.style.overflow = 'hidden'
     document.body.style.position = 'fixed'
     document.body.style.top = '-' + window.scrollY + 'px'
     document.body.style.width = '100%'
+    window.addEventListener('touchmove', preventScroll, { passive: false })
+    window.addEventListener('wheel', preventScroll, { passive: false })
   }
 
   function unlockScroll() {
@@ -50,8 +53,15 @@ document.addEventListener('DOMContentLoaded', function () {
     document.body.style.position = ''
     document.body.style.top = ''
     document.body.style.width = ''
+    document.body.style.overflow = ''
     document.documentElement.style.overflow = ''
+    window.removeEventListener('touchmove', preventScroll)
+    window.removeEventListener('wheel', preventScroll)
     window.scrollTo(0, parseInt(scrollY || '0') * -1)
+  }
+
+  function preventScroll(e) {
+    e.preventDefault()
   }
 
   function initHero(canvas, frameCount) {
