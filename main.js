@@ -1,12 +1,11 @@
 /* ─── Constants ─────────────────────────────────────── */
-var TRACK_HEIGHT_MULTIPLIER = 3
 var NAV_SCROLL_THRESHOLD = 80
 var SECTION_VISIBILITY_RATIO = 0.5
 var LOADING_HIDE_DELAY_MS = 500
 var REVEAL_THRESHOLD = 0.15
 var MAX_REVEAL_DELAY = 4
 var MOBILE_FRAME_COUNT = 135
-var PC_FRAME_COUNT = 161
+var PC_FRAME_COUNT = 202
 
 /* ─── Helpers ───────────────────────────────────────── */
 function $(sel, ctx) { return (ctx || document).querySelector(sel) }
@@ -38,30 +37,32 @@ document.addEventListener('DOMContentLoaded', function () {
     setTimeout(function () { loading.style.display = 'none' }, LOADING_HIDE_DELAY_MS)
   }
 
+  function preventScroll(e) { e.preventDefault() }
+  function preventKey(e) {
+    var keys = [32, 33, 34, 35, 36, 37, 38, 39, 40]
+    if (keys.indexOf(e.keyCode) > -1) e.preventDefault()
+  }
+
+  var scrollOverlay = null
   function lockScroll() {
-    document.documentElement.style.overflow = 'hidden'
-    document.body.style.overflow = 'hidden'
-    document.body.style.position = 'fixed'
-    document.body.style.top = '-' + window.scrollY + 'px'
-    document.body.style.width = '100%'
+    document.documentElement.classList.add('scroll-locked')
+    scrollOverlay = document.createElement('div')
+    scrollOverlay.className = 'scroll-lock-overlay'
+    document.body.appendChild(scrollOverlay)
     window.addEventListener('touchmove', preventScroll, { passive: false })
     window.addEventListener('wheel', preventScroll, { passive: false })
+    window.addEventListener('keydown', preventKey, { passive: false })
   }
 
   function unlockScroll() {
-    var scrollY = document.body.style.top
-    document.body.style.position = ''
-    document.body.style.top = ''
-    document.body.style.width = ''
-    document.body.style.overflow = ''
-    document.documentElement.style.overflow = ''
+    document.documentElement.classList.remove('scroll-locked')
+    if (scrollOverlay && scrollOverlay.parentNode) {
+      scrollOverlay.parentNode.removeChild(scrollOverlay)
+    }
+    scrollOverlay = null
     window.removeEventListener('touchmove', preventScroll)
     window.removeEventListener('wheel', preventScroll)
-    window.scrollTo(0, parseInt(scrollY || '0') * -1)
-  }
-
-  function preventScroll(e) {
-    e.preventDefault()
+    window.removeEventListener('keydown', preventKey)
   }
 
   function initHero(canvas, frameCount) {
@@ -94,15 +95,18 @@ document.addEventListener('DOMContentLoaded', function () {
           drawFrame(0)
           hideLoad()
 
+          var scrollDistance = frameCount * 16
           var obj = { frame: 0 }
           gsap.to(obj, {
             frame: frameCount - 1,
             ease: 'none',
             scrollTrigger: {
-              trigger: heroTrack,
+              trigger: heroSection,
               start: 'top top',
-              end: 'bottom top',
-              scrub: true,
+              end: '+=' + scrollDistance,
+              scrub: 0.3,
+              pin: true,
+              anticipatePin: 1,
             },
             onUpdate: function () {
               drawFrame(Math.round(obj.frame))
@@ -118,7 +122,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   if (heroTrack && heroSection) {
     lockScroll()
-    heroTrack.style.height = window.innerHeight * TRACK_HEIGHT_MULTIPLIER + 'px'
 
     if (isMobile()) {
       initHero(mobileCanvas, MOBILE_FRAME_COUNT)
