@@ -1,8 +1,9 @@
 import './style.css'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { ScrollSmoother } from 'gsap/ScrollSmoother'
 
-gsap.registerPlugin(ScrollTrigger)
+gsap.registerPlugin(ScrollTrigger, ScrollSmoother)
 
 /* ─── Constants ─────────────────────────────────────── */
 const TRACK_HEIGHT_MULTIPLIER = 3
@@ -12,6 +13,7 @@ const LOADING_HIDE_DELAY_MS = 500
 const REVEAL_THRESHOLD = 0.15
 const MAX_REVEAL_DELAY = 4
 const MOBILE_FRAME_COUNT = 135
+const PC_FRAME_COUNT = 135
 
 /* ─── Helpers ───────────────────────────────────────── */
 const $ = (sel, ctx = document) => ctx.querySelector(sel)
@@ -20,10 +22,18 @@ const $$ = (sel, ctx = document) => [...ctx.querySelectorAll(sel)]
 document.addEventListener('DOMContentLoaded', () => {
   history.scrollRestoration = 'manual'
 
+  /* ===== SMOOTHER ===== */
+  ScrollSmoother.create({
+    wrapper: '#smooth-wrapper',
+    content: '#smooth-content',
+    smooth: 1.5,
+    effects: true,
+  })
+
   /* ===== HERO ===== */
   const heroTrack = document.getElementById('hero-track')
   const heroSection = document.getElementById('hero-section')
-  const pcVideo = document.getElementById('hero-video-pc')
+  const pcCanvas = document.getElementById('hero-canvas-pc')
   const mobileCanvas = document.getElementById('hero-canvas-mobile')
   const loadBar = document.getElementById('load-bar')
   const loadPct = document.getElementById('load-pct')
@@ -39,94 +49,64 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => { loading.style.display = 'none' }, LOADING_HIDE_DELAY_MS)
   }
 
+  function initScrub(canvas, frameCount) {
+    const ctx = canvas.getContext('2d')
+    const frames = []
+    let loadedCount = 0
+
+    const drawFrame = (idx) => {
+      const img = frames[idx]
+      if (img && img.complete && img.naturalWidth) {
+        canvas.width = img.naturalWidth
+        canvas.height = img.naturalHeight
+        ctx.drawImage(img, 0, 0)
+      }
+    }
+
+    for (let i = 1; i <= frameCount; i++) {
+      const img = new Image()
+      const num = String(i).padStart(3, '0')
+      img.src = `/hero/${isMobile() ? 'mobile' : 'pc'}/ezgif-frame-${num}.jpg`
+      img.onload = () => {
+        loadedCount++
+        if (loadBar) {
+          const pct = Math.round((loadedCount / frameCount) * 100)
+          loadBar.style.width = pct + '%'
+          if (loadPct) loadPct.textContent = String(pct)
+        }
+        if (loadedCount === frameCount) {
+          drawFrame(0)
+          hideLoad()
+          if (isMobile()) document.body.style.overflow = ''
+
+          const obj = { frame: 0 }
+          gsap.to(obj, {
+            frame: frameCount - 1,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: heroTrack,
+              start: 'top top',
+              end: 'bottom top',
+              scrub: 0.5,
+            },
+            onUpdate() {
+              drawFrame(Math.round(obj.frame))
+            },
+          })
+        }
+      }
+      frames.push(img)
+    }
+  }
+
   if (heroTrack && heroSection) {
     heroTrack.style.height = window.innerHeight * TRACK_HEIGHT_MULTIPLIER + 'px'
 
     if (isMobile()) {
-      /* ── MOBILE: Canvas image sequence + GSAP ScrollTrigger ── */
       document.body.style.overflow = 'hidden'
-      const ctx = mobileCanvas.getContext('2d')
-      const frames = []
-      let loadedCount = 0
-
-      const drawFrame = (idx) => {
-        const img = frames[idx]
-        if (img && img.complete && img.naturalWidth) {
-          mobileCanvas.width = img.naturalWidth
-          mobileCanvas.height = img.naturalHeight
-          ctx.drawImage(img, 0, 0)
-        }
-      }
-
-      for (let i = 1; i <= MOBILE_FRAME_COUNT; i++) {
-        const img = new Image()
-        const num = String(i).padStart(3, '0')
-        img.src = `/hero/mobile/ezgif-frame-${num}.jpg`
-        img.onload = () => {
-          loadedCount++
-          if (loadBar) {
-            const pct = Math.round((loadedCount / MOBILE_FRAME_COUNT) * 100)
-            loadBar.style.width = pct + '%'
-            if (loadPct) loadPct.textContent = String(pct)
-          }
-          if (loadedCount === MOBILE_FRAME_COUNT) {
-            drawFrame(0)
-            hideLoad()
-            document.body.style.overflow = ''
-            initMobileScrub()
-          }
-        }
-        frames.push(img)
-      }
-
-      function initMobileScrub() {
-        const obj = { frame: 0 }
-        gsap.to(obj, {
-          frame: MOBILE_FRAME_COUNT - 1,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: heroTrack,
-            start: 'top top',
-            end: 'bottom top',
-            scrub: 0.5,
-          },
-          onUpdate() {
-            drawFrame(Math.round(obj.frame))
-          },
-        })
-      }
-
-    } else if (pcVideo) {
-      /* ── DESKTOP: Video scrub via rAF ── */
-      pcVideo.src = pcVideo.dataset.src
-
-      const onVidReady = () => {
-        if (loadHidden) return
-        if (pcVideo.readyState >= 2) hideLoad()
-      }
-      pcVideo.addEventListener('canplay', onVidReady)
-      pcVideo.addEventListener('loadeddata', onVidReady)
-
-      const bufferTimer = setInterval(() => {
-        if (loadHidden) { clearInterval(bufferTimer); return }
-        if (pcVideo.readyState >= 2) { hideLoad(); clearInterval(bufferTimer); return }
-        if (pcVideo.buffered.length > 0 && pcVideo.duration) {
-          const pct = Math.round((pcVideo.buffered.end(0) / pcVideo.duration) * 100)
-          if (loadBar) loadBar.style.width = pct + '%'
-          if (loadPct) loadPct.textContent = String(pct)
-        }
-      }, 200)
-
-      const tick = () => {
-        const rect = heroTrack.getBoundingClientRect()
-        const max = heroTrack.offsetHeight - window.innerHeight
-        const p = max <= 0 ? 0 : Math.max(0, Math.min(1, -rect.top / max))
-        if (pcVideo.duration && pcVideo.readyState >= 2) {
-          pcVideo.currentTime = p * pcVideo.duration
-        }
-        requestAnimationFrame(tick)
-      }
-      requestAnimationFrame(tick)
+      initScrub(mobileCanvas, MOBILE_FRAME_COUNT)
+    } else if (pcCanvas) {
+      initScrub(pcCanvas, PC_FRAME_COUNT)
     }
   }
 
