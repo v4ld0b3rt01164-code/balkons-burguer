@@ -13,7 +13,7 @@ const LOADING_HIDE_DELAY_MS = 500
 const REVEAL_THRESHOLD = 0.15
 const MAX_REVEAL_DELAY = 4
 const MOBILE_FRAME_COUNT = 135
-const PC_FRAME_COUNT = 135
+const PC_FRAME_COUNT = 161
 
 /* ─── Helpers ───────────────────────────────────────── */
 const $ = (sel, ctx = document) => ctx.querySelector(sel)
@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
     for (let i = 1; i <= frameCount; i++) {
       const img = new Image()
       const num = String(i).padStart(3, '0')
-      img.src = `/hero/${isMobile() ? 'mobile' : 'pc'}/ezgif-frame-${num}.jpg`
+      img.src = `/hero/${isMobile() ? 'mobile' : 'desktop'}/ezgif-frame-${num}.jpg`
       img.onload = () => {
         loadedCount++
         if (loadBar) {
