@@ -163,6 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function toggleMenu(open) {
     menuToggle?.classList.toggle('active', open)
+    menuToggle?.setAttribute('aria-expanded', String(open))
     mobileNav?.classList.toggle('open', open)
     mobileOverlay?.classList.toggle('open', open)
     document.body.style.overflow = open ? 'hidden' : ''
@@ -178,6 +179,18 @@ document.addEventListener('DOMContentLoaded', () => {
   $$('.mobile-nav a').forEach(a => {
     a.addEventListener('click', () => toggleMenu(false))
   })
+
+  /* ===== REVEAL ON SCROLL ===== */
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible')
+        observer.unobserve(entry.target)
+      }
+    })
+  }, { threshold: REVEAL_THRESHOLD })
+
+  $$('.reveal').forEach(el => observer.observe(el))
 
   /* ===== CARDAPIO ===== */
   ;(async () => {
@@ -196,6 +209,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabsEl = document.getElementById('cardapio-tabs')
     const contentEl = document.getElementById('cardapio-content')
 
+    tabsEl.setAttribute('role', 'tablist')
+
     const tabNames = Object.keys(tabGroup)
     let activeTab = tabNames[0]
 
@@ -206,6 +221,8 @@ document.addEventListener('DOMContentLoaded', () => {
       tabNames.forEach((name) => {
         const btn = document.createElement('button')
         btn.className = 'cardapio-tab'
+        btn.setAttribute('role', 'tab')
+        btn.setAttribute('aria-selected', name === activeTab ? 'true' : 'false')
         if (name === activeTab) btn.classList.add('active')
         btn.textContent = name.toUpperCase()
         btn.addEventListener('click', () => { activeTab = name; render() })
@@ -215,11 +232,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const items = data.filter(tabGroup[activeTab])
       const grid = document.createElement('div')
       grid.className = 'cardapio-grid'
+      grid.setAttribute('role', 'tabpanel')
 
       items.forEach((item, idx) => {
         const div = document.createElement('div')
         const delay = Math.min(idx, MAX_REVEAL_DELAY)
-        div.className = 'cardapio-item reveal visible' + (idx > 0 ? ' reveal-delay-' + delay : '')
+        div.className = 'cardapio-item reveal' + (idx > 0 ? ' reveal-delay-' + delay : '')
 
         const header = document.createElement('div')
         header.className = 'cardapio-item-header'
@@ -247,6 +265,8 @@ document.addEventListener('DOMContentLoaded', () => {
       })
 
       contentEl.appendChild(grid)
+
+      grid.querySelectorAll('.reveal').forEach(el => observer.observe(el))
     }
 
     render()
@@ -259,6 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
     cardapioToggle.addEventListener('click', () => {
       const isOpen = cardapioBody.classList.toggle('open')
       cardapioToggle.textContent = isOpen ? 'Fechar cardápio' : 'Ver nosso cardápio'
+      cardapioToggle.setAttribute('aria-expanded', String(isOpen))
       if (isOpen) {
         setTimeout(() => {
           cardapioBody.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -266,16 +287,4 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     })
   }
-
-  /* ===== REVEAL ON SCROLL ===== */
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible')
-        observer.unobserve(entry.target)
-      }
-    })
-  }, { threshold: REVEAL_THRESHOLD })
-
-  $$('.reveal').forEach(el => observer.observe(el))
 })
