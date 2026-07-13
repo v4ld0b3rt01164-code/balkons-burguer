@@ -1,76 +1,131 @@
 import './style.css'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+gsap.registerPlugin(ScrollTrigger)
+
+/* ─── Constants ─────────────────────────────────────── */
+const TRACK_HEIGHT_MULTIPLIER = 3
+const NAV_SCROLL_THRESHOLD = 80
+const SECTION_VISIBILITY_RATIO = 0.5
+const LOADING_HIDE_DELAY_MS = 500
+const REVEAL_THRESHOLD = 0.15
+const MAX_REVEAL_DELAY = 4
+const MOBILE_FRAME_COUNT = 135
+
+/* ─── Helpers ───────────────────────────────────────── */
+const $ = (sel, ctx = document) => ctx.querySelector(sel)
+const $$ = (sel, ctx = document) => [...ctx.querySelectorAll(sel)]
 
 document.addEventListener('DOMContentLoaded', () => {
+  history.scrollRestoration = 'manual'
 
   /* ===== HERO ===== */
   const heroTrack = document.getElementById('hero-track')
   const heroSection = document.getElementById('hero-section')
-  const vids = {
-    pc: document.getElementById('hero-video-pc'),
-    mobile: document.getElementById('hero-video-mobile'),
+  const pcVideo = document.getElementById('hero-video-pc')
+  const mobileCanvas = document.getElementById('hero-canvas-mobile')
+  const loadBar = document.getElementById('load-bar')
+  const loadPct = document.getElementById('load-pct')
+  const loading = document.getElementById('hero-loading')
+
+  const isMobile = () => mobileCanvas && getComputedStyle(mobileCanvas).display !== 'none'
+
+  let loadHidden = false
+  const hideLoad = () => {
+    if (loadHidden) return
+    loadHidden = true
+    loading.style.opacity = '0'
+    setTimeout(() => { loading.style.display = 'none' }, LOADING_HIDE_DELAY_MS)
   }
 
-  if (heroTrack && heroSection && vids.pc && vids.mobile) {
-    const trackHeight = window.innerHeight * 3
-    heroTrack.style.height = trackHeight + 'px'
+  if (heroTrack && heroSection) {
+    heroTrack.style.height = window.innerHeight * TRACK_HEIGHT_MULTIPLIER + 'px'
 
-    const loadBar = document.getElementById('load-bar')
-    const loadPct = document.getElementById('load-pct')
-    const loading = document.getElementById('hero-loading')
+    if (isMobile()) {
+      /* ── MOBILE: Canvas image sequence + GSAP ScrollTrigger ── */
+      const ctx = mobileCanvas.getContext('2d')
+      const frames = []
+      let loadedCount = 0
 
-    /* Init both videos */
-    vids.pc.src = vids.pc.dataset.src
-    vids.mobile.src = vids.mobile.dataset.src
-
-    /* Get currently active video (visible one) */
-    const activeVideo = () => getComputedStyle(vids.pc).display !== 'none' ? vids.pc : vids.mobile
-
-    /* Hide loading when either video is ready */
-    let loaded = { pc: false, mobile: false }
-    const hideLoad = (vid) => {
-      const key = vid === vids.pc ? 'pc' : 'mobile'
-      if (loaded[key]) return
-      loaded[key] = true
-      if (loaded.pc && loaded.mobile) {
-        loading.style.opacity = '0'
-        setTimeout(() => { loading.style.display = 'none' }, 500)
-      }
-    }
-    vids.pc.addEventListener('canplay', () => hideLoad(vids.pc))
-    vids.pc.addEventListener('loadeddata', () => hideLoad(vids.pc))
-    vids.mobile.addEventListener('canplay', () => hideLoad(vids.mobile))
-    vids.mobile.addEventListener('loadeddata', () => hideLoad(vids.mobile))
-
-    /* Buffering progress (on whichever loads first) */
-    setInterval(() => {
-      const v = activeVideo()
-      if (v.readyState >= 2) { hideLoad(v); return }
-      if (v.buffered.length > 0) {
-        const pct = Math.round((v.buffered.end(0) / v.duration) * 100)
-        loadBar.style.width = pct + '%'
-        if (loadPct) loadPct.textContent = String(pct)
-      }
-    }, 200)
-
-    /* Seek first frame on both */
-    const seekFirst = (v) => { v.addEventListener('loadedmetadata', () => { v.currentTime = 0 }, { once: true }) }
-    seekFirst(vids.pc)
-    seekFirst(vids.mobile)
-
-    /* Scroll scrub */
-    const tick = () => {
-      const rect = heroTrack.getBoundingClientRect()
-      const max = heroTrack.offsetHeight - window.innerHeight
-      const p = max <= 0 ? 0 : Math.max(0, Math.min(1, -rect.top / max))
-
-      const v = activeVideo()
-      if (v.duration && v.readyState >= 2) {
-        v.currentTime = p * v.duration
+      const drawFrame = (idx) => {
+        const img = frames[idx]
+        if (img && img.complete && img.naturalWidth) {
+          mobileCanvas.width = img.naturalWidth
+          mobileCanvas.height = img.naturalHeight
+          ctx.drawImage(img, 0, 0)
+        }
       }
 
+      for (let i = 1; i <= MOBILE_FRAME_COUNT; i++) {
+        const img = new Image()
+        const num = String(i).padStart(3, '0')
+        img.src = `/hero/mobile/ezgif-frame-${num}.jpg`
+        img.onload = () => {
+          loadedCount++
+          if (loadBar) {
+            const pct = Math.round((loadedCount / MOBILE_FRAME_COUNT) * 100)
+            loadBar.style.width = pct + '%'
+            if (loadPct) loadPct.textContent = String(pct)
+          }
+          if (loadedCount === MOBILE_FRAME_COUNT) {
+            drawFrame(0)
+            hideLoad()
+            initMobileScrub()
+          }
+        }
+        frames.push(img)
+      }
+
+      function initMobileScrub() {
+        const obj = { frame: 0 }
+        gsap.to(obj, {
+          frame: MOBILE_FRAME_COUNT - 1,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: heroTrack,
+            start: 'top top',
+            end: 'bottom top',
+            scrub: 0.5,
+          },
+          onUpdate() {
+            drawFrame(Math.round(obj.frame))
+          },
+        })
+      }
+
+    } else if (pcVideo) {
+      /* ── DESKTOP: Video scrub via rAF ── */
+      pcVideo.src = pcVideo.dataset.src
+
+      const onVidReady = () => {
+        if (loadHidden) return
+        if (pcVideo.readyState >= 2) hideLoad()
+      }
+      pcVideo.addEventListener('canplay', onVidReady)
+      pcVideo.addEventListener('loadeddata', onVidReady)
+
+      const bufferTimer = setInterval(() => {
+        if (loadHidden) { clearInterval(bufferTimer); return }
+        if (pcVideo.readyState >= 2) { hideLoad(); clearInterval(bufferTimer); return }
+        if (pcVideo.buffered.length > 0 && pcVideo.duration) {
+          const pct = Math.round((pcVideo.buffered.end(0) / pcVideo.duration) * 100)
+          if (loadBar) loadBar.style.width = pct + '%'
+          if (loadPct) loadPct.textContent = String(pct)
+        }
+      }, 200)
+
+      const tick = () => {
+        const rect = heroTrack.getBoundingClientRect()
+        const max = heroTrack.offsetHeight - window.innerHeight
+        const p = max <= 0 ? 0 : Math.max(0, Math.min(1, -rect.top / max))
+        if (pcVideo.duration && pcVideo.readyState >= 2) {
+          pcVideo.currentTime = p * pcVideo.duration
+        }
+        requestAnimationFrame(tick)
+      }
       requestAnimationFrame(tick)
     }
-    requestAnimationFrame(tick)
   }
 
   /* ===== SCROLL ARROW ===== */
@@ -84,33 +139,27 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ===== NAV SCROLL ===== */
-  const nav = document.querySelector('.nav')
+  const nav = $('.nav')
+  const activeClass = 'nav-link-active'
 
   window.addEventListener('scroll', () => {
     const sy = window.scrollY
-    if (sy > 80) {
-      nav?.classList.add('scrolled')
-    } else {
-      nav?.classList.remove('scrolled')
-    }
+    nav?.classList.toggle('scrolled', sy > NAV_SCROLL_THRESHOLD)
 
-    const sections = document.querySelectorAll('[data-section]')
-    sections.forEach(sec => {
+    $$('[data-section]').forEach(sec => {
       const rect = sec.getBoundingClientRect()
       const id = sec.getAttribute('data-section')
-      const link = document.querySelector(`.nav-links a[href="#${id}"]`)
-      if (link && rect.top < window.innerHeight * 0.5 && rect.bottom > 0) {
-        link.style.color = 'var(--orange)'
-      } else if (link) {
-        link.style.color = ''
-      }
+      const link = $(`.nav-links a[href="#${id}"]`)
+      if (!link) return
+      const isActive = rect.top < window.innerHeight * SECTION_VISIBILITY_RATIO && rect.bottom > 0
+      link.classList.toggle(activeClass, isActive)
     })
   })
 
   /* ===== MOBILE MENU ===== */
-  const menuToggle = document.querySelector('.menu-toggle')
-  const mobileNav = document.querySelector('.mobile-nav')
-  const mobileOverlay = document.querySelector('.mobile-nav-overlay')
+  const menuToggle = $('.menu-toggle')
+  const mobileNav = $('.mobile-nav')
+  const mobileOverlay = $('.mobile-nav-overlay')
 
   function toggleMenu(open) {
     menuToggle?.classList.toggle('active', open)
@@ -126,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   mobileOverlay?.addEventListener('click', () => toggleMenu(false))
 
-  document.querySelectorAll('.mobile-nav a').forEach(a => {
+  $$('.mobile-nav a').forEach(a => {
     a.addEventListener('click', () => toggleMenu(false))
   })
 
@@ -154,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tabsEl.innerHTML = ''
       contentEl.innerHTML = ''
 
-      tabNames.forEach((name, idx) => {
+      tabNames.forEach((name) => {
         const btn = document.createElement('button')
         btn.className = 'cardapio-tab'
         if (name === activeTab) btn.classList.add('active')
@@ -169,7 +218,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       items.forEach((item, idx) => {
         const div = document.createElement('div')
-        div.className = 'cardapio-item reveal visible' + (idx > 0 ? ' reveal-delay-' + Math.min(idx, 4) : '')
+        const delay = Math.min(idx, MAX_REVEAL_DELAY)
+        div.className = 'cardapio-item reveal visible' + (idx > 0 ? ' reveal-delay-' + delay : '')
 
         const header = document.createElement('div')
         header.className = 'cardapio-item-header'
@@ -203,7 +253,6 @@ document.addEventListener('DOMContentLoaded', () => {
   })()
 
   /* ===== REVEAL ON SCROLL ===== */
-  const revealEls = document.querySelectorAll('.reveal')
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -211,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
         observer.unobserve(entry.target)
       }
     })
-  }, { threshold: 0.15 })
+  }, { threshold: REVEAL_THRESHOLD })
 
-  revealEls.forEach(el => observer.observe(el))
+  $$('.reveal').forEach(el => observer.observe(el))
 })
