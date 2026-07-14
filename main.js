@@ -308,9 +308,9 @@ document.addEventListener('DOMContentLoaded', function () {
     cardapioClose.addEventListener('click', function () { setCardapioOpen(false) })
   }
 
-  if (cardapioBody && cardapioSheet) {
+  if (cardapioBody) {
     cardapioBody.addEventListener('click', function (e) {
-      if (!cardapioSheet.contains(e.target)) setCardapioOpen(false)
+      if (e.target === cardapioBody) setCardapioOpen(false)
     })
   }
 
