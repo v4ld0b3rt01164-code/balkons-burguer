@@ -11,8 +11,8 @@ npx wrangler pages deploy . --project-name balkons-burguer --branch master
 ```
 
 ## Hero
-- **Desktop:** Canvas image sequence (161 JPEGs em `public/hero/desktop/`) — ScrollTrigger scrub no scroll
-- **Mobile:** Canvas image sequence (135 JPEGs em `public/hero/mobile/`) — ScrollTrigger scrub no scroll
+- **Desktop:** Canvas image sequence (202 JPEGs em `hero/desktop/`) — ScrollTrigger scrub no scroll
+- **Mobile:** Canvas image sequence (135 JPEGs em `hero/mobile/`) — ScrollTrigger scrub no scroll
 - CSS `display: block/none` em 768px alterna entre canvas desktop/mobile
 - Preloader (inline `<style>` + `DOMContentLoaded`) esconde body; loading overlay mostra progresso dos frames
 - Scroll fica travado (`position: fixed` no body) até todos os frames carregarem
@@ -23,7 +23,7 @@ npx wrangler pages deploy . --project-name balkons-burguer --branch master
   ```
 
 ## Cardápio
-- Source: `public/cardapio.json`
+- Source: `cardapio.json`
 - Renderizado por JS em tabs; escondido atrás de toggle "Ver nosso cardápio" que desliza da esquerda
 - Category grouping: Hambúrguers (+ Promoção do Dia), Combos, Porções (+ Batatas), Sobremesas, Bebidas, Adicionais (+ Molhos)
 - Price format: `R$ 9,99`
@@ -42,13 +42,12 @@ hero → cardápio → destaque → história → localização → footer
 index.html              # todas as seções + metas + JSON-LD
 style.css               # todos os estilos (CSS custom properties para brand tokens)
 main.js                 # hero scrub, nav, menu, cardápio toggle/renderer, scroll reveals
-public/
-  hero/desktop/         # 161 JPEG frames para hero desktop
-  hero/mobile/          # 135 JPEG frames para hero mobile
-  logo.png / destaque.webp / favicon.png
-  cardapio.json
-  fonts/inter-black.woff2
-  _headers              # Cloudflare security headers
+hero/desktop/           # 202 JPEG frames para hero desktop
+hero/mobile/            # 135 JPEG frames para hero mobile
+logo.png / destaque.webp / favicon.png / burger-destaque.png
+cardapio.json
+fonts/inter-black.woff2
+_headers                # Cloudflare security headers
 ```
 
 ## Brand tokens (`:root` in style.css)
