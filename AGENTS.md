@@ -24,7 +24,9 @@ npx wrangler pages deploy . --project-name balkons-burguer --branch master
 
 ## Cardápio
 - Source: `cardapio.json`
-- Renderizado por JS em tabs; escondido atrás de toggle "Ver nosso cardápio" que desliza da esquerda
+- Renderizado por JS em tabs; aberto via toggle "Ver nosso cardápio"
+- Apresentado como página oculta estilo bottom sheet: desliza de baixo para cima, cobre a tela, fundo vermelho (#C1121F), cards pretos
+- Fecha pelo botão X, clicando no backdrop ou pressionando ESC; scroll do body é bloqueado enquanto aberto
 - Category grouping: Hambúrguers (+ Promoção do Dia), Combos, Porções (+ Batatas), Sobremesas, Bebidas, Adicionais (+ Molhos)
 - Price format: `R$ 9,99`
 
