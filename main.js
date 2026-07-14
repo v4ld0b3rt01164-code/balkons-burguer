@@ -278,17 +278,45 @@ document.addEventListener('DOMContentLoaded', function () {
 
   /* ===== CARDAPIO TOGGLE ===== */
   var cardapioToggle = document.getElementById('cardapio-toggle')
+  var cardapioClose = document.getElementById('cardapio-close')
   var cardapioBody = document.getElementById('cardapio-body')
+  var cardapioSheet = cardapioBody ? cardapioBody.querySelector('.cardapio-sheet') : null
+
+  function setCardapioOpen(open) {
+    if (!cardapioBody) return
+    cardapioBody.classList.toggle('open', open)
+    if (cardapioToggle) {
+      cardapioToggle.textContent = open ? 'Fechar cardápio' : 'Ver nosso cardápio'
+      cardapioToggle.setAttribute('aria-expanded', String(open))
+    }
+    if (open) {
+      document.documentElement.classList.add('scroll-locked')
+      if (cardapioClose) setTimeout(function () { cardapioClose.focus() }, 100)
+    } else {
+      document.documentElement.classList.remove('scroll-locked')
+      if (cardapioToggle) cardapioToggle.focus()
+    }
+  }
+
   if (cardapioToggle && cardapioBody) {
     cardapioToggle.addEventListener('click', function () {
-      var isOpen = cardapioBody.classList.toggle('open')
-      cardapioToggle.textContent = isOpen ? 'Fechar cardápio' : 'Ver nosso cardápio'
-      cardapioToggle.setAttribute('aria-expanded', String(isOpen))
-      if (isOpen) {
-        setTimeout(function () {
-          cardapioBody.scrollIntoView({ behavior: 'smooth', block: 'start' })
-        }, 100)
-      }
+      setCardapioOpen(!cardapioBody.classList.contains('open'))
     })
   }
+
+  if (cardapioClose && cardapioBody) {
+    cardapioClose.addEventListener('click', function () { setCardapioOpen(false) })
+  }
+
+  if (cardapioBody && cardapioSheet) {
+    cardapioBody.addEventListener('click', function (e) {
+      if (!cardapioSheet.contains(e.target)) setCardapioOpen(false)
+    })
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && cardapioBody && cardapioBody.classList.contains('open')) {
+      setCardapioOpen(false)
+    }
+  })
 })

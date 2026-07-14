@@ -120,12 +120,20 @@
         <button class="cta-featured" id="cardapio-toggle" aria-expanded="false" aria-controls="cardapio-body">Ver nosso cardápio</button>
       </div>
 
-      <div class="cardapio-body" id="cardapio-body" role="region" aria-label="Cardápio">
-        <div class="cardapio-tabs" id="cardapio-tabs"></div>
-        <div id="cardapio-content"></div>
-        <p class="cardapio-disclaimer">
-          * Preços e disponibilidade podem variar. Consulte o cardápio atual no nosso site.
-        </p>
+      <div class="cardapio-body" id="cardapio-body" role="dialog" aria-modal="true" aria-label="Cardápio">
+        <div class="cardapio-sheet">
+          <div class="cardapio-header">
+            <h3 class="cardapio-title">NOSSO <span class="highlight">CARDÁPIO</span></h3>
+            <button class="cardapio-close" id="cardapio-close" aria-label="Fechar cardápio">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+          <div class="cardapio-tabs" id="cardapio-tabs"></div>
+          <div id="cardapio-content"></div>
+          <p class="cardapio-disclaimer">
+            * Preços e disponibilidade podem variar. Consulte o cardápio atual no nosso site.
+          </p>
+        </div>
       </div>
     </div>
   </section>
